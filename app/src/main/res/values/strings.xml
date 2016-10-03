@@ -4,4 +4,7 @@
     <string name="add_new_signal">Add new signal</string>
     <string name="ok">Ok</string>
     <string name="cancel">Cancel</string>
+    <string name="mark">Mark</string>
+    <string name="repeat">Repeat</string>
+    <string name="vibration">Vibration</string>
 </resources>

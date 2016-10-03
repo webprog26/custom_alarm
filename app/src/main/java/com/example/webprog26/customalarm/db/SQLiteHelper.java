@@ -22,17 +22,20 @@ public class SQLiteHelper extends SQLiteOpenHelper{
     public static final String ALARM_HOUR = "alarm_hour";
     public static final String ALARM_MINUTE = "alarm_minute";
     public static final String IS_ALARM_ACTIVE = "is_alarm_on";
+    public static final String IS_REPEAT_ON = "is_repeat_on";
+    public static final String IS_VIBRATION_ON = "is_vibration_on";
+    public static final String MELODY_FILE_PATH = "melody_file_path";
 
     //Days table columns
     public static final String DAY_ID = "_id";
     public static final String CURRENT_ALARM_ID = "alarm_id";
-    public static final String MONDAY = "monday";
-    public static final String TUESDAY = "tuesday";
-    public static final String WEDNESDAY = "wednesday";
-    public static final String THURSDAY  = "thursday";
-    public static final String FRIDAY = "friday";
-    public static final String SATURDAY = "saturday";
-    public static final String SUNDAY = "sunday";
+    public static final String MO = "MO";
+    public static final String TU = "TU";
+    public static final String WE = "WE";
+    public static final String TH = "TH";
+    public static final String FR = "FR";
+    public static final String SA = "SA";
+    public static final String SU = "SU";
 
     public SQLiteHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
@@ -48,19 +51,22 @@ public class SQLiteHelper extends SQLiteOpenHelper{
         + ALARM_ID + " integer primary key autoincrement, "
         + ALARM_HOUR + " integer, "
         + ALARM_MINUTE + " integer, "
-        + IS_ALARM_ACTIVE + " varchar(10))");
+        + IS_ALARM_ACTIVE + " varchar(10), "
+        + IS_REPEAT_ON + " varchar(10), "
+        + IS_VIBRATION_ON + " varchar(10), "
+        + MELODY_FILE_PATH + " varchar(100))");
 
         //creating DAYS_TABLE
         db.execSQL("create table " + DAYS_TABLE_TITLE + "("
                 + DAY_ID + " integer primary key autoincrement, "
                 + CURRENT_ALARM_ID + " integer, "
-                + MONDAY + " varchar(10), "
-                + TUESDAY + " varchar(10), "
-                + WEDNESDAY + " varchar(10), "
-                + THURSDAY + " varchar(10), "
-                + FRIDAY + " varchar(10), "
-                + SATURDAY + " varchar(10), "
-                + SUNDAY + " varchar(20))");
+                + MO + " varchar(10), "
+                + TU + " varchar(10), "
+                + WE + " varchar(10), "
+                + TH + " varchar(10), "
+                + FR + " varchar(10), "
+                + SA + " varchar(10), "
+                + SU + " varchar(10))");
     }
 
 

@@ -13,17 +13,23 @@ import com.example.webprog26.customalarm.adapters.AlarmsListAdapter;
 import com.example.webprog26.customalarm.interfaces.OnAlarmsListItemClickListener;
 import com.example.webprog26.customalarm.models.Alarmer;
 import com.example.webprog26.customalarm.providers.AlarmProvider;
+import com.example.webprog26.customalarm.providers.DaysProvider;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements TimeDialog.TimeCommunicator {
 
     private static final String LOG_TAG = "CustomAlarmMainActivity";
     private static final String TIME_DIALOG_TAG = "timeDialog";
-    private static final String ALARM_TURNED_ON = "true";
-    private static final String ALARM_TURNED_OFF = "false";
+    public static final String ALARM_TURNED_ON = "true";
+    public static final String ALARM_TURNED_OFF = "false";
+
+    //just for test
+    public static final String ALARM_MELODY_TITLE = "Funny moves";
 
     public static final int TIMER_REQUEST_CODE = 101;
 
@@ -31,10 +37,13 @@ public class MainActivity extends AppCompatActivity implements TimeDialog.TimeCo
     private RecyclerView mAlarmsRecyclerView;
     private Button mBtnAddNewSignal;
     private List<Alarmer> mAlarmsList;
+    private Map<String, Boolean> mDaysActiveMap;
 
     private TimeDialog mTimeDialog;
 
     private AlarmProvider mAlarmProvider;
+    private DaysProvider mDaysProvider;
+
     private AlarmsListAdapter mAlarmsListAdapter;
 
     @Override
@@ -43,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements TimeDialog.TimeCo
         setContentView(R.layout.activity_main);
 
         mAlarmProvider = new AlarmProvider(this);
+        mDaysProvider = new DaysProvider(this);
 
         mAlarmsList = mAlarmProvider.getAlarmsList();
 
@@ -59,9 +69,9 @@ public class MainActivity extends AppCompatActivity implements TimeDialog.TimeCo
         mAlarmsListAdapter = new AlarmsListAdapter(this, mAlarmsList, new OnAlarmsListItemClickListener() {
             @Override
             public void onAlarmsListItemClick(Alarmer alarmer) {
-                //Todo
+                Log.i(LOG_TAG, "alarm with id " + alarmer.getId() + " was clicked!");
             }
-        }, mAlarmProvider);
+        }, mAlarmProvider, mDaysProvider);
         mAlarmsRecyclerView.setAdapter(mAlarmsListAdapter);
         mAlarmsRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
@@ -83,12 +93,23 @@ public class MainActivity extends AppCompatActivity implements TimeDialog.TimeCo
     public void sendTime(int code, int hour, int minute) {
         if(code == TIMER_REQUEST_CODE)
         {
-            Alarmer alarmer = new Alarmer(hour, minute, ALARM_TURNED_ON);
+            String[] daysTitles = getResources().getStringArray(R.array.days);
+            mDaysActiveMap = new HashMap<>();
+
+            for(String dayTitle: daysTitles)
+            {
+                mDaysActiveMap.put(dayTitle, Boolean.valueOf(ALARM_TURNED_ON));
+            }
+
+
+
+            Alarmer alarmer = new Alarmer(hour, minute, mDaysActiveMap, ALARM_TURNED_ON, ALARM_TURNED_ON, ALARM_TURNED_ON, ALARM_MELODY_TITLE);
             Log.i(LOG_TAG,
                     "alarmer hour " + alarmer.getAlarmHours()
                     + "alarmer minutes " + alarmer.getAlarmMinutes()
                     + "iAlarmOn " + alarmer.isAlarmActive());
             mAlarmProvider.insertAlarmToDataBase(alarmer);
+            mDaysProvider.insertDaysToDB(alarmer);
             mAlarmsListAdapter.addItemToList(alarmer);
             Log.i(LOG_TAG, "item_count in adapter: " + mAlarmsListAdapter.getItemCount());
             Log.i(LOG_TAG, "from DB\n");

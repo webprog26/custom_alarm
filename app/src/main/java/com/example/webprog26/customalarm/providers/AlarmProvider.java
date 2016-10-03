@@ -20,10 +20,12 @@ public class AlarmProvider {
 
     private SQLiteHelper mSqLiteHelper;
     private Activity mActivity;
+    private DaysProvider mDaysProvider;
 
     public AlarmProvider(Activity mActivity) {
         this.mActivity = mActivity;
         mSqLiteHelper = new SQLiteHelper(mActivity);
+        mDaysProvider = new DaysProvider(mActivity);
     }
 
     public long insertAlarmToDataBase(Alarmer alarmer)
@@ -32,6 +34,9 @@ public class AlarmProvider {
         contentValues.put(SQLiteHelper.ALARM_HOUR, alarmer.getAlarmHours());
         contentValues.put(SQLiteHelper.ALARM_MINUTE, alarmer.getAlarmMinutes());
         contentValues.put(SQLiteHelper.IS_ALARM_ACTIVE, alarmer.isAlarmActive());
+        contentValues.put(SQLiteHelper.IS_REPEAT_ON, alarmer.getIsRepeatOn());
+        contentValues.put(SQLiteHelper.IS_VIBRATION_ON, alarmer.getIsVibrationOn());
+        contentValues.put(SQLiteHelper.MELODY_FILE_PATH, alarmer.getmAlarmMelodyFilePath());
         Log.i(LOG_TAG, "writing to DB alarm state: " + alarmer.isAlarmActive());
 
         return mSqLiteHelper.getWritableDatabase().insert(SQLiteHelper.ALARMS_TABLE_TITLE, null, contentValues);
@@ -45,10 +50,14 @@ public class AlarmProvider {
 
         while(cursor.moveToNext())
         {
-            Alarmer alarmer = new Alarmer(cursor.getString(cursor.getColumnIndex(SQLiteHelper.IS_ALARM_ACTIVE)),
-                                         cursor.getInt(cursor.getColumnIndex(SQLiteHelper.ALARM_MINUTE)),
-                                         cursor.getInt(cursor.getColumnIndex(SQLiteHelper.ALARM_HOUR)),
-                                         cursor.getLong(cursor.getColumnIndex(SQLiteHelper.ALARM_ID)));
+            Alarmer alarmer = new Alarmer(cursor.getLong(cursor.getColumnIndex(SQLiteHelper.ALARM_ID)),
+                                          cursor.getInt(cursor.getColumnIndex(SQLiteHelper.ALARM_HOUR)),
+                                          cursor.getInt(cursor.getColumnIndex(SQLiteHelper.ALARM_MINUTE)),
+                                          mDaysProvider.getDaysActiveMapFromDB(cursor.getLong(cursor.getColumnIndex(SQLiteHelper.ALARM_ID))),
+                                          cursor.getString(cursor.getColumnIndex(SQLiteHelper.IS_ALARM_ACTIVE)),
+                                          cursor.getString(cursor.getColumnIndex(SQLiteHelper.IS_REPEAT_ON)),
+                                          cursor.getString(cursor.getColumnIndex(SQLiteHelper.IS_VIBRATION_ON)),
+                                          cursor.getString(cursor.getColumnIndex(SQLiteHelper.MELODY_FILE_PATH)));
             alarmsArrayList.add(alarmer);
             Log.i(LOG_TAG, "getting from DB alarm state: " + alarmer.isAlarmActive());
         }
