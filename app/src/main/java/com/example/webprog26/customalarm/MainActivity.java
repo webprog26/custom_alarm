@@ -15,9 +15,7 @@ import com.example.webprog26.customalarm.models.Alarmer;
 import com.example.webprog26.customalarm.providers.AlarmProvider;
 import com.example.webprog26.customalarm.providers.DaysProvider;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -56,14 +54,6 @@ public class MainActivity extends AppCompatActivity implements TimeDialog.TimeCo
 
         mAlarmsList = mAlarmProvider.getAlarmsList();
 
-        if(mAlarmsList.size() > 0)
-        {
-            for(Alarmer alarmer: mAlarmsList)
-            {
-                Log.i(LOG_TAG, "from list: " + alarmer.getAlarmHours());
-            }
-        }
-
         mAlarmsRecyclerView = (RecyclerView) findViewById(R.id.alarmsList);
         mAlarmsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mAlarmsListAdapter = new AlarmsListAdapter(this, mAlarmsList, new OnAlarmsListItemClickListener() {
@@ -84,9 +74,6 @@ public class MainActivity extends AppCompatActivity implements TimeDialog.TimeCo
                 mTimeDialog.show(getSupportFragmentManager(), TIME_DIALOG_TAG);
             }
         });
-
-
-
     }
 
     @Override
@@ -101,26 +88,11 @@ public class MainActivity extends AppCompatActivity implements TimeDialog.TimeCo
                 mDaysActiveMap.put(dayTitle, Boolean.valueOf(ALARM_TURNED_ON));
             }
 
-
-
             Alarmer alarmer = new Alarmer(hour, minute, mDaysActiveMap, ALARM_TURNED_ON, ALARM_TURNED_ON, ALARM_TURNED_ON, ALARM_MELODY_TITLE);
-            Log.i(LOG_TAG,
-                    "alarmer hour " + alarmer.getAlarmHours()
-                    + "alarmer minutes " + alarmer.getAlarmMinutes()
-                    + "iAlarmOn " + alarmer.isAlarmActive());
+
             mAlarmProvider.insertAlarmToDataBase(alarmer);
             mDaysProvider.insertDaysToDB(alarmer);
             mAlarmsListAdapter.addItemToList(alarmer);
-            Log.i(LOG_TAG, "item_count in adapter: " + mAlarmsListAdapter.getItemCount());
-            Log.i(LOG_TAG, "from DB\n");
-            LinkedList<Alarmer> alarmsList = mAlarmProvider.getAlarmsList();
-
-            for(Alarmer alarmer1: alarmsList)
-            {
-                Log.i(LOG_TAG, "alarm time: " + alarmer1.getAlarmHours() + ":" + alarmer1.getAlarmMinutes());
-            }
         }
     }
-
-
 }

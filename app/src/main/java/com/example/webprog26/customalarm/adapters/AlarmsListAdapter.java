@@ -15,7 +15,6 @@ import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
-import com.example.webprog26.customalarm.MainActivity;
 import com.example.webprog26.customalarm.R;
 import com.example.webprog26.customalarm.interfaces.OnAlarmsListItemClickListener;
 import com.example.webprog26.customalarm.interfaces.OnDaysListItemClickListener;
@@ -23,11 +22,9 @@ import com.example.webprog26.customalarm.models.Alarmer;
 import com.example.webprog26.customalarm.providers.AlarmProvider;
 import com.example.webprog26.customalarm.providers.DaysProvider;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
+
 
 /**
  * Created by webprog26 on 02.10.2016.
@@ -110,7 +107,6 @@ public class AlarmsListAdapter extends RecyclerView.Adapter<AlarmsListAdapter.Al
             mBtnDeleteAlarm.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Log.i(LOG_TAG, "delete button clicked" + v.getTag());
                     mAlarmProvider.deleteAlarm(mAlarmsList.get((int)v.getTag()).getId());
                     mAlarmsList.remove((int)v.getTag());
                     notifyItemRemoved((int)v.getTag());
@@ -142,6 +138,10 @@ public class AlarmsListAdapter extends RecyclerView.Adapter<AlarmsListAdapter.Al
             });
 
             mDaysRecyclerView.setAdapter(daysAdapter);
+
+            mChbIsVibrationOn.setChecked(Boolean.valueOf(alarmer.getIsVibrationOn()));
+            mChbRepeatAlarm.setChecked(Boolean.valueOf(alarmer.getIsRepeatOn()));
+            mTvAlarmMelodyTitle.setText(alarmer.getmAlarmMelodyFilePath());
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override

@@ -8,7 +8,6 @@ import android.util.Log;
 import com.example.webprog26.customalarm.db.SQLiteHelper;
 import com.example.webprog26.customalarm.models.Alarmer;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 
 /**
@@ -37,7 +36,6 @@ public class AlarmProvider {
         contentValues.put(SQLiteHelper.IS_REPEAT_ON, alarmer.getIsRepeatOn());
         contentValues.put(SQLiteHelper.IS_VIBRATION_ON, alarmer.getIsVibrationOn());
         contentValues.put(SQLiteHelper.MELODY_FILE_PATH, alarmer.getmAlarmMelodyFilePath());
-        Log.i(LOG_TAG, "writing to DB alarm state: " + alarmer.isAlarmActive());
 
         return mSqLiteHelper.getWritableDatabase().insert(SQLiteHelper.ALARMS_TABLE_TITLE, null, contentValues);
     }
@@ -59,7 +57,6 @@ public class AlarmProvider {
                                           cursor.getString(cursor.getColumnIndex(SQLiteHelper.IS_VIBRATION_ON)),
                                           cursor.getString(cursor.getColumnIndex(SQLiteHelper.MELODY_FILE_PATH)));
             alarmsArrayList.add(alarmer);
-            Log.i(LOG_TAG, "getting from DB alarm state: " + alarmer.isAlarmActive());
         }
         cursor.close();
         return alarmsArrayList;
