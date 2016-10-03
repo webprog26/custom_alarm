@@ -55,4 +55,9 @@ public class AlarmProvider {
         cursor.close();
         return alarmsArrayList;
     }
+
+    public void deleteAlarm(long alarmId)
+    {
+        mSqLiteHelper.getWritableDatabase().delete(SQLiteHelper.ALARMS_TABLE_TITLE, SQLiteHelper.ALARM_ID + " = " + alarmId, null);
+    }
 }

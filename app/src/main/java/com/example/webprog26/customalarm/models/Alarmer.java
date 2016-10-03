@@ -47,4 +47,8 @@ public class Alarmer {
     public String isAlarmActive() {
         return isAlarmActive;
     }
+
+    public long getId() {
+        return mId;
+    }
 }

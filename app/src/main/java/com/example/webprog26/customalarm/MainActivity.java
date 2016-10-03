@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements TimeDialog.TimeCo
             public void onAlarmsListItemClick(Alarmer alarmer) {
                 //Todo
             }
-        });
+        }, mAlarmProvider);
         mAlarmsRecyclerView.setAdapter(mAlarmsListAdapter);
         mAlarmsRecyclerView.setItemAnimator(new DefaultItemAnimator());
 

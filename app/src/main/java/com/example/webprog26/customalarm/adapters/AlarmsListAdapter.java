@@ -6,6 +6,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.ImageButton;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -30,18 +33,33 @@ public class AlarmsListAdapter extends RecyclerView.Adapter<AlarmsListAdapter.Al
 
         private TextView mTvTime;
         private Switch mAlarmSwitch;
+        private ImageButton mBtnDeleteAlarm;
 
         public AlarmsViewHolder(View itemView) {
             super(itemView);
 
             mTvTime = (TextView) itemView.findViewById(R.id.tvTime);
             mAlarmSwitch = (Switch) itemView.findViewById(R.id.alarmSwitch);
+
+            mBtnDeleteAlarm = (ImageButton) itemView.findViewById(R.id.btnDeleteAlarm);
+
+            mBtnDeleteAlarm.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Log.i(LOG_TAG, "delete button clicked" + v.getTag());
+                    mAlarmProvider.deleteAlarm(mAlarmsList.get((int)v.getTag()).getId());
+                    mAlarmsList.remove((int)v.getTag());
+                    notifyItemRemoved((int)v.getTag());
+
+                }
+            });
         }
 
         public void bind(final Alarmer alarmer, final OnAlarmsListItemClickListener listener)
         {
             mTvTime.setText(getStringTime(alarmer));
             mAlarmSwitch.setChecked(Boolean.parseBoolean(alarmer.isAlarmActive()));
+            mBtnDeleteAlarm.setTag(this.getAdapterPosition());
         }
 
         private String getStringTime(Alarmer alarmer) {
@@ -67,18 +85,17 @@ public class AlarmsListAdapter extends RecyclerView.Adapter<AlarmsListAdapter.Al
     private OnAlarmsListItemClickListener mListener;
     private AlarmProvider mAlarmProvider;
 
-    public AlarmsListAdapter(Activity mActivity, List<Alarmer> mAlarmsList, OnAlarmsListItemClickListener mListener) {
+    public AlarmsListAdapter(Activity mActivity, List<Alarmer> mAlarmsList, OnAlarmsListItemClickListener mListener, AlarmProvider alarmProvider) {
         this.mActivity = mActivity;
         this.mAlarmsList = mAlarmsList;
         this.mListener = mListener;
-        mAlarmProvider = new AlarmProvider(mActivity);
+        this.mAlarmProvider = alarmProvider;
     }
 
     @Override
     public AlarmsListAdapter.AlarmsViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(mActivity).inflate(R.layout.alarm_list_item, parent, false);
-        AlarmsViewHolder viewHolder = new AlarmsViewHolder(view);
-        return viewHolder;
+        return new AlarmsViewHolder(view);
     }
 
     @Override
@@ -96,4 +113,6 @@ public class AlarmsListAdapter extends RecyclerView.Adapter<AlarmsListAdapter.Al
         mAlarmsList.add(alarmer);
         notifyDataSetChanged();
     }
+
+
 }
