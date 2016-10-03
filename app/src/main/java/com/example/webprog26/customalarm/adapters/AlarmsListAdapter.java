@@ -133,7 +133,7 @@ public class AlarmsListAdapter extends RecyclerView.Adapter<AlarmsListAdapter.Al
             AlarmOptionsDaysAdapter daysAdapter = new AlarmOptionsDaysAdapter(mActivity, mDaysActiveMap, new OnDaysListItemClickListener() {
                 @Override
                 public void onDaysListItemClick(String dayTitle) {
-                    Log.i(LOG_TAG, "dayTitle " + dayTitle + " was clicked!");
+                    Log.i(LOG_TAG, "dayTitle " + dayTitle + " was clicked! Where alarmId is " + alarmer.getId());
                 }
             });
 
