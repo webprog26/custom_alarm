@@ -12,32 +12,65 @@ public class Alarmer {
     private int mAlarmHours;
     private int mAlarmMinutes;
     private Map<String, Boolean> mDaysActiveMap;
-
     private String isAlarmActive;
     private String isRepeatOn;
     private String isVibrationOn;
     private String mAlarmMelodyFilePath;
 
-    public Alarmer(int mAlarmHours, int mAlarmMinutes, Map<String, Boolean> mDaysActiveMap, String isAlarmActive, String isRepeatOn, String isVibrationOn, String mAlarmMelodyFilePath) {
+    //default constructor to add alarm to DB without repeat
+    public Alarmer(int mAlarmHours,
+                   int mAlarmMinutes,
+                   String isAlarmActive,
+                   String isRepeatOn,
+                   String isVibrationOn,
+                   String mAlarmMelodyFilePath)
+    {
         this.mAlarmHours = mAlarmHours;
         this.mAlarmMinutes = mAlarmMinutes;
-        this.mDaysActiveMap = mDaysActiveMap;
         this.isAlarmActive = isAlarmActive;
         this.isRepeatOn = isRepeatOn;
         this.isVibrationOn = isVibrationOn;
         this.mAlarmMelodyFilePath = mAlarmMelodyFilePath;
     }
 
-    public Alarmer(long alarmId, int mAlarmHours, int mAlarmMinutes, Map<String, Boolean> mDaysActiveMap, String isAlarmActive, String isRepeatOn, String isVibrationOn, String mAlarmMelodyFilePath) {
-        this.mId = alarmId;
+    //constructor to return alarm from DB with alarmId but without repeat
+    public Alarmer(long id,
+                   int mAlarmHours,
+                   int mAlarmMinutes,
+                   Map<String, Boolean> daysActiveMap,
+                   String isAlarmActive,
+                   String isRepeatOn,
+                   String isVibrationOn,
+                   String mAlarmMelodyFilePath)
+    {
+        this.mId = id;
         this.mAlarmHours = mAlarmHours;
         this.mAlarmMinutes = mAlarmMinutes;
-        this.mDaysActiveMap = mDaysActiveMap;
+        this.mDaysActiveMap = daysActiveMap;
         this.isAlarmActive = isAlarmActive;
         this.isRepeatOn = isRepeatOn;
         this.isVibrationOn = isVibrationOn;
         this.mAlarmMelodyFilePath = mAlarmMelodyFilePath;
     }
+
+//    //constructor to return alarm from DB with alarmId and with repeat
+//    public Alarmer(long alarmId,
+//                   int mAlarmHours,
+//                   int mAlarmMinutes,
+//                   Map<String, Boolean> daysActiveMap,
+//                   String isAlarmActive,
+//                   String isRepeatOn,
+//                   String isVibrationOn,
+//                   String mAlarmMelodyFilePath) {
+//        this.mId = alarmId;
+//        this.mAlarmHours = mAlarmHours;
+//        this.mAlarmMinutes = mAlarmMinutes;
+//        this.mDaysActiveMap = daysActiveMap;
+//        this.isAlarmActive = isAlarmActive;
+//        this.isRepeatOn = isRepeatOn;
+//        this.isVibrationOn = isVibrationOn;
+//        this.mAlarmMelodyFilePath = mAlarmMelodyFilePath;
+//    }
 
 
     public int getAlarmHours() {
@@ -52,11 +85,19 @@ public class Alarmer {
         return isAlarmActive;
     }
 
+    public void setId(long id) {
+        this.mId = id;
+    }
+
     public long getId() {
         return mId;
     }
 
-    public Map<String, Boolean> getmDaysActiveMap() {
+    public void setmDaysActiveMap(Map<String, Boolean> mDaysActiveMap) {
+        this.mDaysActiveMap = mDaysActiveMap;
+    }
+
+    public Map<String, Boolean> getDaysActiveMap() {
         return mDaysActiveMap;
     }
 

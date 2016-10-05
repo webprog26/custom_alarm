@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/CustomAlarm.iml" filepath="$PROJECT_DIR$/CustomAlarm.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/custom_alarm.iml" filepath="$PROJECT_DIR$/custom_alarm.iml" />
     </modules>
   </component>
 </project>

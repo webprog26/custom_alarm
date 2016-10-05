@@ -33,22 +33,27 @@ public class AlarmOptionsDaysAdapter extends RecyclerView.Adapter<AlarmOptionsDa
             super(itemView);
 
             mTvDayTitle = (TextView) itemView.findViewById(R.id.tvDayShortTitle);
+            if(!isMapHasActiveDays())
+            {
+                mTvDayTitle.setVisibility(View.GONE);
+            }
         }
 
         public void bind(final String dayTitle, final OnDaysListItemClickListener listener)
         {
-            if(mDaysTitlesMap.get(dayTitle))
-            {
-                mTvDayTitle.setPaintFlags(mTvDayTitle.getPaintFlags() |   Paint.UNDERLINE_TEXT_FLAG);
-            }
-            mTvDayTitle.setText(dayTitle);
-
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    listener.onDaysListItemClick(dayTitle);
+                if(mDaysTitlesMap.get(dayTitle))
+                {
+                    mTvDayTitle.setPaintFlags(mTvDayTitle.getPaintFlags() |   Paint.UNDERLINE_TEXT_FLAG);
                 }
-            });
+                mTvDayTitle.setText(dayTitle);
+
+                itemView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        listener.onDaysListItemClick(dayTitle);
+                    }
+                });
+
         }
     }
 
@@ -65,9 +70,12 @@ public class AlarmOptionsDaysAdapter extends RecyclerView.Adapter<AlarmOptionsDa
         this.mDaysTitlesMap = mDaysTitlesMap;
         this.listener = listener;
 
-        for(String day: mDaysTitlesMap.keySet())
+        if(isMapHasActiveDays())
         {
-            mDaysTitlesList.add(day);
+            for(String day: mDaysTitlesMap.keySet())
+            {
+                mDaysTitlesList.add(day);
+            }
         }
     }
 
@@ -89,5 +97,10 @@ public class AlarmOptionsDaysAdapter extends RecyclerView.Adapter<AlarmOptionsDa
 
     public void updateAdapter() {
         notifyDataSetChanged();
+    }
+
+    private boolean isMapHasActiveDays()
+    {
+        return mDaysTitlesMap.size() > 0;
     }
 }

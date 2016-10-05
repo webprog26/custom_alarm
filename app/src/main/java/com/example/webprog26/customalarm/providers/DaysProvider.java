@@ -26,14 +26,14 @@ public class DaysProvider {
         mSqLiteHelper = new SQLiteHelper(mActivity);
     }
 
-    public long insertDaysToDB(Alarmer alarmer)
+    public long insertDaysToDB(long alarmId, Map<String, Boolean> daysActiveMap)
     {
         ContentValues contentValues = new ContentValues();
 
-        contentValues.put(SQLiteHelper.CURRENT_ALARM_ID, alarmer.getId());
-        for(String dayTitle: alarmer.getmDaysActiveMap().keySet())
+        contentValues.put(SQLiteHelper.CURRENT_ALARM_ID, alarmId);
+        for(String dayTitle: daysActiveMap.keySet())
         {
-            contentValues.put(dayTitle, String.valueOf(alarmer.getmDaysActiveMap().get(dayTitle)));
+            contentValues.put(dayTitle, String.valueOf(daysActiveMap.get(dayTitle)));
         }
         return mSqLiteHelper.getWritableDatabase().insert(SQLiteHelper.DAYS_TABLE_TITLE, null, contentValues);
     }
@@ -52,8 +52,10 @@ public class DaysProvider {
     public Map<String, Boolean> getDaysActiveMapFromDB(long id)
     {
        Log.i(LOG_TAG, "in daysProvider alarm id " + id);
+       String selection = SQLiteHelper.CURRENT_ALARM_ID +  " = ?";
+       String[] selectionArgs = new String[]{String.valueOf(id)};
        Map<String, Boolean> retMap = new LinkedHashMap<>();
-       Cursor cursor = mSqLiteHelper.getReadableDatabase().query(SQLiteHelper.DAYS_TABLE_TITLE, null, null, null, null, null, null);
+       Cursor cursor = mSqLiteHelper.getReadableDatabase().query(SQLiteHelper.DAYS_TABLE_TITLE, null, selection, selectionArgs, null, null, null);
 
        while(cursor.moveToNext())
        {

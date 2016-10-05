@@ -56,8 +56,10 @@ public class AlarmProvider {
                                           cursor.getString(cursor.getColumnIndex(SQLiteHelper.IS_REPEAT_ON)),
                                           cursor.getString(cursor.getColumnIndex(SQLiteHelper.IS_VIBRATION_ON)),
                                           cursor.getString(cursor.getColumnIndex(SQLiteHelper.MELODY_FILE_PATH)));
+            Log.i(LOG_TAG, "in alarmProvider alarm id is " + alarmer.getId());
             alarmsArrayList.add(alarmer);
         }
+
         cursor.close();
         return alarmsArrayList;
     }
@@ -65,5 +67,16 @@ public class AlarmProvider {
     public void deleteAlarm(long alarmId)
     {
         mSqLiteHelper.getWritableDatabase().delete(SQLiteHelper.ALARMS_TABLE_TITLE, SQLiteHelper.ALARM_ID + " = " + alarmId, null);
+    }
+
+    public long updateAlarmRepeatMode(long alarmId, boolean isChecked)
+    {
+        Log.i(LOG_TAG, "updatingAlarmRepeatMode to " + isChecked);
+        String strFilter = SQLiteHelper.ALARM_ID + " = " + String.valueOf(alarmId);
+
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(SQLiteHelper.IS_REPEAT_ON, String.valueOf(isChecked));
+
+        return mSqLiteHelper.getWritableDatabase().update(SQLiteHelper.ALARMS_TABLE_TITLE, contentValues, strFilter, null);
     }
 }

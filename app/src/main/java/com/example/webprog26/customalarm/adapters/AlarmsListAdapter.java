@@ -15,6 +15,7 @@ import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import com.example.webprog26.customalarm.MainActivity;
 import com.example.webprog26.customalarm.R;
 import com.example.webprog26.customalarm.interfaces.OnAlarmsListItemClickListener;
 import com.example.webprog26.customalarm.interfaces.OnDaysListItemClickListener;
@@ -22,6 +23,7 @@ import com.example.webprog26.customalarm.models.Alarmer;
 import com.example.webprog26.customalarm.providers.AlarmProvider;
 import com.example.webprog26.customalarm.providers.DaysProvider;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,6 +32,7 @@ import java.util.Map;
  * Created by webprog26 on 02.10.2016.
  */
 public class AlarmsListAdapter extends RecyclerView.Adapter<AlarmsListAdapter.AlarmsViewHolder> implements OnAlarmsListItemClickListener{
+
 
     @Override
     public void onAlarmsListItemClick(Alarmer alarmer) {
@@ -43,10 +46,12 @@ public class AlarmsListAdapter extends RecyclerView.Adapter<AlarmsListAdapter.Al
         private ImageButton mBtnShowOptions, mBtnHideOptions;
         private ImageButton mBtnDeleteAlarm;
         private AppCompatCheckBox mChbRepeatAlarm, mChbIsVibrationOn;
-        private RecyclerView mDaysRecyclerView;
         private LinearLayout mLlAlarmMelodyChooserContainer;
         private TextView mTvAlarmMelodyTitle;
         private Map<String, Boolean> mDaysActiveMap;
+        private DaysProvider mDaysProvider;
+
+        private AlarmOptionsDaysAdapter daysAdapter;
 
         public AlarmsViewHolder(View itemView) {
             super(itemView);
@@ -61,11 +66,15 @@ public class AlarmsListAdapter extends RecyclerView.Adapter<AlarmsListAdapter.Al
             mBtnHideOptions = (ImageButton) itemView.findViewById(R.id.btnHideOptions);
             mChbRepeatAlarm = (AppCompatCheckBox) itemView.findViewById(R.id.chbRepeatAlarm);
             mChbIsVibrationOn = (AppCompatCheckBox) itemView.findViewById(R.id.chbIsVibrationOn);
-            mDaysRecyclerView = (RecyclerView) itemView.findViewById(R.id.daysRecyclerView);
             mLlAlarmMelodyChooserContainer = (LinearLayout) itemView.findViewById(R.id.lLalarmMelodyChooserContainer);
             mTvAlarmMelodyTitle = (TextView) itemView.findViewById(R.id.tvAlarmMelodyTitle);
 
+
+
+            mDaysProvider = new DaysProvider(mActivity);
+
             //**************settingOnClickListeners to view in animated options layout
+
             mBtnShowOptions.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -80,10 +89,95 @@ public class AlarmsListAdapter extends RecyclerView.Adapter<AlarmsListAdapter.Al
                 }
             });
 
+            mBtnDeleteAlarm.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mAlarmProvider.deleteAlarm(mAlarmsList.get((int)v.getTag()).getId());
+                    mAlarmsList.remove((int)v.getTag());
+                    notifyItemRemoved((int)v.getTag());
+
+                }
+            });
+        }
+
+        /**
+         * fills every alarm-item with data received from DB
+         * @param alarmer
+         * @param listener
+         */
+        public void bind(final Alarmer alarmer, final OnAlarmsListItemClickListener listener)
+        {
+            //**************initializing RecyclerView that contains list of "alarm-active" days
+            final RecyclerView daysRecyclerView = (RecyclerView) itemView.findViewById(R.id.daysRecyclerView);
+
+            //getting Map<String, Boolean> from DaysProvider. Map contains days of week alarm will be repeating on
+            mDaysActiveMap = mDaysProvider.getDaysActiveMapFromDB(alarmer.getId());
+            Log.i(LOG_TAG, "mChbRepeatAlarm is checked and uploaded map is " + mDaysActiveMap);
+
+            Log.i(LOG_TAG, "in AlarmListAdapter alarm id is " + alarmer.getId() + " " +  alarmer.getAlarmHours() + ":" + alarmer.getAlarmMinutes());
+            mTvTime.setText(getStringTime(alarmer));
+            mAlarmSwitch.setChecked(Boolean.valueOf(alarmer.isAlarmActive()));
+            mChbRepeatAlarm.setChecked(Boolean.valueOf(alarmer.getIsRepeatOn()));
+            mChbIsVibrationOn.setChecked(Boolean.valueOf(alarmer.getIsVibrationOn()));
+            mBtnDeleteAlarm.setTag(this.getAdapterPosition());
+
+
             mChbRepeatAlarm.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    Log.i(LOG_TAG, "repeat alarm checked state changed to " + isChecked);
+
+                    if(isChecked)
+                    {
+                        if(mDaysActiveMap.size() == 0) {                                                 //if there are no days in
+                            String[] dayTitles = mActivity.getResources().getStringArray(R.array.days);  //the map, this the first
+                                                                                                         //initialization of the newly-created
+                            for (String dayTitle : dayTitles)                                            //alarm. So it fills with days titles
+                            {                                                                            //and then DaysProvider receives it with
+                                mDaysActiveMap.put(dayTitle, Boolean.valueOf(MainActivity.REPEAT_ON));   //alarmId & puts to DB
+                            }
+
+                            mDaysProvider.insertDaysToDB(alarmer.getId(), mDaysActiveMap);
+
+
+                            Log.i(LOG_TAG, "filled map is " + mDaysActiveMap + " alarmerId = " + alarmer.getId());
+                        }else {
+                            mDaysActiveMap = mDaysProvider.getDaysActiveMapFromDB(alarmer.getId());      //if DB already has a map
+                        }                                                                                //for this alarmId
+                                                                                                         //app receives it from
+                                                                                                         //DaysAdapter
+                        //updating alarms' repeat status in DB
+                        mAlarmProvider.updateAlarmRepeatMode(alarmer.getId(), isChecked);
+
+                        //show previously hidden RecylerView with days of the week
+                        if(daysRecyclerView.getVisibility() == View.GONE)
+                        {
+                            daysRecyclerView.setVisibility(View.VISIBLE);
+                        }
+
+                        daysRecyclerView.setItemAnimator(new DefaultItemAnimator());                      //here we should initialize
+                        daysRecyclerView.setHasFixedSize(true);                                           //separate
+                        LinearLayoutManager layoutManager = new LinearLayoutManager(mActivity,            // AlarmOptionsDaysAdapter
+                                                                LinearLayoutManager.HORIZONTAL,           //for every alarm
+                                                                                    false);
+                        layoutManager.scrollToPosition(0);
+                        daysRecyclerView.setLayoutManager(layoutManager);
+
+                        //defining AlarmOptionsDaysAdapter for current RecyclerView
+                        daysAdapter = new AlarmOptionsDaysAdapter(mActivity, mDaysActiveMap, new OnDaysListItemClickListener() {
+                            @Override
+                            public void onDaysListItemClick(String dayTitle) {
+                                Log.i(LOG_TAG, "dayTitle " + dayTitle + " was clicked! Where alarmId is " + alarmer.getId());
+                            }
+                        });
+                        daysRecyclerView.setAdapter(daysAdapter);
+                    } else {
+                        //repeat unChecked hide RecylerView
+                        mAlarmProvider.updateAlarmRepeatMode(alarmer.getId(), isChecked);
+                        if(daysRecyclerView.getVisibility() == View.VISIBLE)
+                        {
+                            daysRecyclerView.setVisibility(View.GONE);
+                        }
+                    }
                 }
             });
 
@@ -102,42 +196,14 @@ public class AlarmsListAdapter extends RecyclerView.Adapter<AlarmsListAdapter.Al
             });
 
 
+            if(!mChbRepeatAlarm.isChecked())
+            {
+                daysRecyclerView.setVisibility(View.GONE);
+            } else {
+                daysRecyclerView.setVisibility(View.VISIBLE);
+            }
 
 
-            mBtnDeleteAlarm.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mAlarmProvider.deleteAlarm(mAlarmsList.get((int)v.getTag()).getId());
-                    mAlarmsList.remove((int)v.getTag());
-                    notifyItemRemoved((int)v.getTag());
-
-                }
-            });
-        }
-
-        public void bind(final Alarmer alarmer, final OnAlarmsListItemClickListener listener)
-        {
-            mTvTime.setText(getStringTime(alarmer));
-            mAlarmSwitch.setChecked(Boolean.parseBoolean(alarmer.isAlarmActive()));
-            mBtnDeleteAlarm.setTag(this.getAdapterPosition());
-
-            //**************initializing RecyclerView that contains list of "alarm-active" days
-            mDaysActiveMap  = alarmer.getmDaysActiveMap();
-            mDaysRecyclerView.setItemAnimator(new DefaultItemAnimator());
-            mDaysRecyclerView.setHasFixedSize(true);
-            LinearLayoutManager layoutManager = new LinearLayoutManager(mActivity, LinearLayoutManager.HORIZONTAL, false);
-            layoutManager.scrollToPosition(0);
-            mDaysRecyclerView.setLayoutManager(layoutManager);
-
-
-            AlarmOptionsDaysAdapter daysAdapter = new AlarmOptionsDaysAdapter(mActivity, mDaysActiveMap, new OnDaysListItemClickListener() {
-                @Override
-                public void onDaysListItemClick(String dayTitle) {
-                    Log.i(LOG_TAG, "dayTitle " + dayTitle + " was clicked! Where alarmId is " + alarmer.getId());
-                }
-            });
-
-            mDaysRecyclerView.setAdapter(daysAdapter);
 
             mChbIsVibrationOn.setChecked(Boolean.valueOf(alarmer.getIsVibrationOn()));
             mChbRepeatAlarm.setChecked(Boolean.valueOf(alarmer.getIsRepeatOn()));
@@ -173,14 +239,12 @@ public class AlarmsListAdapter extends RecyclerView.Adapter<AlarmsListAdapter.Al
     private List<Alarmer> mAlarmsList;
     private OnAlarmsListItemClickListener mListener;
     private AlarmProvider mAlarmProvider;
-    private DaysProvider mDaysProvider;
 
-    public AlarmsListAdapter(Activity mActivity, List<Alarmer> mAlarmsList, OnAlarmsListItemClickListener mListener, AlarmProvider alarmProvider, DaysProvider daysProvider) {
+    public AlarmsListAdapter(Activity mActivity, List<Alarmer> mAlarmsList, OnAlarmsListItemClickListener mListener, AlarmProvider alarmProvider) {
         this.mActivity = mActivity;
         this.mAlarmsList = mAlarmsList;
         this.mListener = mListener;
         this.mAlarmProvider = alarmProvider;
-        this.mDaysProvider = daysProvider;
     }
 
     @Override
